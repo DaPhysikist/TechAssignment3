@@ -25,19 +25,21 @@ def collect_data():
     """
     global light_value, temp, humidity
     light_url = "http://raspberrypi.local:1234/light_level"
-    temp_url = "http://raspberrypi.local:1234/temperature"
-    humidity_url = "http://raspberrypi.local:1234/humidity"
+    temp_and_humid_url = "http://raspberrypi.local:1234/temperature_and_humidity"
+    display_url = "http://raspberrypi.local:1234/set_display"
     while True:
         try:
             light_data = requests.get(light_url).json()
-            light_value = light_data.get("light_level")
-            temp_data = requests.get(temp_url).json()
-            temp = temp_data.get("temperature")
-            humidity_data = requests.get(humidity_url).json()
-            humidity = humidity_data.get("humidity")
-            print("Light Level:", light_value)
+            light_level = light_data.get("light_level")
+            temp_and_humid_data = requests.get(temp_and_humid_url).json()
+            temp = temp_and_humid_data.get("temperature")
+            humidity = temp_and_humid_data.get("humidity")
+            data = {"temperature":temp, "humidity": humidity, "light_level":light_level}
+            x = requests.post(display_url, json = data)
+            print("Light Level:", light_level)
             print("Temperature:", temp)
             print("Humidity:", humidity)
+            print(x)
         except requests.RequestException as e:
             print("Request Error:", e)
         except ValueError as e:
