@@ -1,0 +1,68 @@
+body {
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.input-group {
+    margin-left: 15px;
+}
+
+.recordElement {
+    text-align: center;
+}
+
+.mic-container {
+    display: flex;
+    justify-content: center;
+}
+
+.mic-button {
+    border: 2px solid #ccc; 
+    background-color: white; 
+    color: #aaa;
+    padding: 15px;
+    cursor: pointer; 
+    font-size: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; 
+    width: 120px; 
+    height: 120px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+  }
+
+  .mic-button:hover {
+    background-color: #f8f8f8; 
+    color: #888;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  }
+
+  .mic-button:focus {
+    outline: none; 
+  }
+
+ .dash-button {
+    margin-top: 20px;
+    border: none;
+    background-color: #4CAF50;
+    color: white; 
+    padding: 10px 20px;
+    cursor: pointer; 
+    font-size: 16px; 
+    border-radius: 5px; 
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.dash-button:hover {
+    background-color: #45a049;
+}
+
+.db-container {
+    display: flex;
+    justify-content: center;
+}
