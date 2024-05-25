@@ -36,5 +36,10 @@ def add_item(display_data: dict):
   global to_display
   to_display = display_data["to_display"]
 
+@app.get("/", response_class=HTMLResponse)
+def get_dashboard():
+  with open("index.html") as html:
+    return HTMLResponse(content=html.read())
+
 if __name__ == "__main__":
   uvicorn.run("app:app", host="0.0.0.0", port=1234, reload=True)

@@ -2,9 +2,12 @@ from multiprocessing import Process
 import os
 import time
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import requests
+import json
+import mysql.connector as mysql
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,6 +21,7 @@ db_name = "TechAssignment3"
 light_value = 0
 temp = 0
 humidity = 0
+
 
 def collect_data():
     """
@@ -40,6 +44,7 @@ def collect_data():
             print("Temperature:", temp)
             print("Humidity:", humidity)
             print(x)
+            db = mysql.connect(host=db_host, database=db_name, user=db_user, passwd=db_pass)
         except requests.RequestException as e:
             print("Request Error:", e)
         except ValueError as e:
@@ -54,6 +59,24 @@ def collect_data():
 app = FastAPI()
 # Mount the static directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/light_level", response_class=JSONResponse)
+def get_light_level() -> JSONResponse:
+  response = {}
+  
+  return JSONResponse(response)
+
+@app.get("/temperature", response_class=JSONResponse)
+def get_temperature() -> JSONResponse:
+  response = {}
+  
+  return JSONResponse(response)
+
+@app.get("/humidity", response_class=JSONResponse)
+def get_humidity() -> JSONResponse:
+  response = {}
+  
+  return JSONResponse(response)
 
 if __name__ == "__main__":
     try:
