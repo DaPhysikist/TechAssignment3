@@ -8,86 +8,16 @@
   </head>
 
   <body>
-    
     <header class="container mt-5 text-center">
       <h1 class="display-3">Dashboard</h1>
+      <br>
     </header>
 
-  <section class="container mt-3">
-
-    <div class="d-flex justify-content-center mb-3">
-      <div style="width: 800px;" id="dataChartContainer"></div>
-    </div>
-
-    <form id="queryForm" class="w-50 mx-auto mb-3">
-      <div class="mb-3">
-        <p>Location:</p>
-
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa fa-map-marker-alt"></i></span>
-          <select style="margin-left: 10px;" id="location_select" name="location_select" required>
-              <option value="default" selected>-- Select an option --</option>
-              <option value="jacobshall">Jacobs Hall</option>
-              <option value="peppercanyonhall">Pepper Canyon Hall</option>
-              <option value="rimac">RIMAC</option>
-              <option value="franklinantoniohall">Franklin Antonio Hall</option>
-              <option value="warrenlecturehall">Warren Lecture Hall</option>
-              <option value="centerhall">Center Hall</option>
-              <option value="makerspace">Makerspace</option>
-              <option value="csebuilding">CSE Building</option>
-              <option value="galbraithhall">Galbraith Hall</option>
-              <option value="pricecenter">Price Center</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <p>Sensor Type:</p>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa fa-thermometer-full"></i></span>
-          <select style="margin-left: 10px;" id="sensor_select" name="sensor_select" required>
-              <option value="default" selected>-- Select an option --</option>
-              <option value="temperature">Temperature</option>
-              <option value="humidity">Humidity</option>
-              <option value="light">Light</option>
-              <option value="pressure">Pressure</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <p>Start Time:</p>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa-solid fa-clock"></i></span>
-          <input type="datetime-local" id="startTime" name="startTime" style="margin-left: 10px;">
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <p>End Time:</p>
-        <div class="input-group">
-          <span class="input-group-text"><i class="fa-regular fa-clock"></i></span>
-          <input type="datetime-local" id="endTime" name="endTime" style="margin-left: 10px;">
-        </div>
-        <br><br>
-      </div>
-
-      <div class="d-flex justify-content-center mb-3">
-        <input type="submit" class="btn btn-primary w-15" id="submitQuery" value="Submit">
-    </div>
-    </form>
-
-    <div class="d-flex justify-content-center mb-3">
-      <button id="interpolateButton" class="btn btn-success">Go to Interpolate Page</button>
-    </div><br>
-  
-    <div class="d-flex justify-content-center">
-      <form action='/logout' method='POST'>
-          <button type="submit" class="btn btn-danger">Logout</button>
-      </form>
-    </div>
-  </section>
-    
+    <main>
+      <div style="width: 800px;" id="temperatureChartContainer"></div>
+      <div style="width: 800px;" id="humidityChartContainer"></div>
+      <div style="width: 800px;" id="lightLevelChartContainer"></div>
+    </main>  
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="static/index.js"></script>

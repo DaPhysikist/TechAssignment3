@@ -1,102 +1,167 @@
-const queryForm = document.getElementById("queryForm");
-const interpolateButton = document.getElementById("interpolateButton");
-const chartContainer = document.getElementById('dataChartContainer');
-const userID = "A17323782";
-var dataChart;
+const tempChartContainer = document.getElementById('temperatureChartContainer');
+const humidityChartContainer = document.getElementById('humidityChartContainer');
+const lightLevelChartContainer = document.getElementById('lightLevelChartContainer');
+
+let sensorData1 = [];
+let sensorData2 = [];
+let sensorData3 = [];
 
 document.addEventListener("DOMContentLoaded", function () {
-    queryForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        let sensorData = [];
+    initializeCharts();
+    setInterval(fetchDataAndUpdateCharts, 5000); // Fetch data every 5 seconds
+});
 
-        const selectedLoc = document.getElementById("location_select").value;         //retrieving form inputs
-        const selectedSensor = document.getElementById("sensor_select").value;
-        const startTime = new Date(document.getElementById("startTime").value);
-        const endTime = new Date(document.getElementById("endTime").value);
-        var ylabel = 'Value';
-        var chartLabel = 'Sensor Values over Time';
+let tempChart, humidityChart, lightLevelChart;
 
-        if (selectedSensor == "temperature"){                       //setting chart labels based on sensor type
-            ylabel = "Value (C)";
-            chartLabel = 'Temperature Sensor Values over Time';
-        }
-        if (selectedSensor == "humidity"){
-            ylabel = "Value (%)";
-            chartLabel = 'Humidity Sensor Values over Time';
-        }
-        if (selectedSensor == "light"){
-            ylabel = "Value (lx)";
-            chartLabel = 'Light Sensor Values over Time';
-        }
-        if (selectedSensor == "pressure"){
-            ylabel = "Value (hPa)";
-            chartLabel = 'Pressure Sensor Values over Time';
-        }
+function initializeCharts() {
+    // Temperature Chart
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.id = 'tempChart';
+    tempChartContainer.appendChild(tempCanvas);
 
-        try {
-            const response = await fetch(`https://ece140.frosty-sky-f43d.workers.dev/api/query?auth=${userID}&sensorType=${selectedSensor}`);        //retrives sensor data
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            const json = await response.json();
-            const responseData = json["results"];
-
-            responseData.forEach(entry => {
-                let time = new Date(entry.time);
-                let value = entry.value;
-                let unit = entry.unit;
-                let location = entry.location.replace(/[^a-zA-Z]/g, "").toLowerCase();   //removes all characters that are not letters and converts to lowercase to account for different methods used to represent location name
-                if ((time >= startTime) && (time <= endTime) && (location == selectedLoc)){            //filters sensor data based on time and location
-                    sensorData.push({x: time.getTime(), y: value}); 
-                }
-            });
-
-            if (chartContainer.firstChild) {                                             //removes old chart to replace it
-                chartContainer.removeChild(chartContainer.firstChild);
-            }
-            const canvas = document.createElement('canvas');
-            canvas.id = 'dataChart';
-            chartContainer.appendChild(canvas);
-
-            dataChart = new Chart(document.getElementById('dataChart'), {                //creates a new chart with the filtered sensor data
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: chartLabel,
-                        data: sensorData,
-                        backgroundColor: 'rgba(0, 60, 120, 0.3)', 
-                        fill: false,
-                        borderColor: 'rgba(0, 60, 120, 1)',
-                        borderWidth: 1
-                    }]
+    tempChart = new Chart(tempCanvas, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Temperature',
+                data: sensorData1,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                fill: false,
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'second'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
                 },
-                options: {
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'minute'
-                            },
-                            title: {
-                                display: true,
-                                text: 'Time'
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: ylabel
-                            }
-                        }
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)'
                     }
                 }
-            });
-        } catch (error) {
-            console.error("Error querying data: ", error);
+            }
         }
     });
 
-    interpolateButton.addEventListener("click", function () {                 //button to switch to interpolate page
-        window.location.href = "/interpolate";
+    // Humidity Chart
+    const humidityCanvas = document.createElement('canvas');
+    humidityCanvas.id = 'humidityChart';
+    humidityChartContainer.appendChild(humidityCanvas);
+
+    humidityChart = new Chart(humidityCanvas, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Humidity',
+                data: sensorData2,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                fill: false,
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'second'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Humidity (%)'
+                    }
+                }
+            }
+        }
     });
-});
+
+    // Light Level Chart
+    const lightLevelCanvas = document.createElement('canvas');
+    lightLevelCanvas.id = 'lightLevelChart';
+    lightLevelChartContainer.appendChild(lightLevelCanvas);
+
+    lightLevelChart = new Chart(lightLevelCanvas, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Light Level',
+                data: sensorData3,
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1,
+                fill: false,
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'second'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Light Level (lx)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+async function fetchDataAndUpdateCharts() {
+    try {
+        const response = await fetch(`/sensor_data`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const json = await response.json();
+
+        // Clear existing data
+        sensorData1.length = 0;
+        sensorData2.length = 0;
+        sensorData3.length = 0;
+
+        // Add new data points to sensorData arrays
+        Object.values(json).forEach(entry => {
+            let tempValue = entry.temperature;
+            let humidValue = entry.humidity;
+            let llValue = entry.light_level;
+            let timestamp = new Date(entry.timestamp);
+            sensorData1.push({ x: timestamp, y: tempValue });
+            sensorData2.push({ x: timestamp, y: humidValue });
+            sensorData3.push({ x: timestamp, y: llValue });
+        });
+
+        // Update charts with new data
+        tempChart.update();
+        humidityChart.update();
+        lightLevelChart.update();
+
+    } catch (error) {
+        console.error("Error querying data: ", error);
+    }
+}
