@@ -1,3 +1,7 @@
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+import uvicorn
 import smbus
 import time
 
@@ -11,7 +15,7 @@ class I2C:
         self.LCD_ADDR = 0x27
         self.BLEN = 1
 
-    def getData(self):
+    def getTHData(self):
         try:
             self.bus.write_i2c_block_data(self.addr_1, 0xAC, MEASURE)
             time.sleep(0.5)
@@ -25,7 +29,7 @@ class I2C:
             print("Error reading temperature and humidity:", e)
             return None, None
 
-    def read_channel(self, channel):
+    def getLData(self, channel=0):
         try:
             config_byte = 0x84 | ((channel & 0x07) << 4)
             self.bus.write_byte(self.addr_2, config_byte)
@@ -73,7 +77,7 @@ class I2C:
         buf &= 0xFB               # Make EN = 0
         self.write_word(self.LCD_ADDR, buf)
 
-    def clear(self):
+    def clear_lcd_screen(self):
         self.send_command(0x01)
 
     def lcd_write(self, x, y, string):
@@ -90,27 +94,52 @@ class I2C:
         for char in string:
             self.send_data(ord(char))
 
-# Initialize AHT10 sensor with bus number 1
-i2c = I2C(bus=1)
+    def init_lcd(self):
+        try:
+            self.send_command(0x33)
+            time.sleep(0.005)
+            self.send_command(0x32)
+            time.sleep(0.005)
+            self.send_command(0x28)
+            time.sleep(0.005)
+            self.send_command(0x0C)
+            time.sleep(0.005)
+            self.send_command(0x01)
+            self.write_byte(self.LCD_ADDR, 0x08)
+        except:
+            return False
 
-count = 0
-try:
-    while True:
-        temperature, humidity = i2c.getData()
-        temperature = round(temperature,2)
-        voltage = i2c.read_channel(0)
-        brightness = voltage * 255 / 5
-        brightness = round(brightness,2)
-        i2c.clear()
-        i2c.lcd_write(0, 0, 'T: ' + str(temperature) + 'C H: ' + str(humidity) + '%')  #"Temp: {:.2f} C  Hum: {:.2f} %".format(temperature, humidity)
-        i2c.lcd_write(0, 1, 'Light: ' + str(brightness)) #"Brightness: {:.2f}".format(brightness)
-        print("Temperature: {} Celsius".format(temperature))
-        print("Humidity: {}%".format(humidity))
-        print("Brightness value: {:.2f}".format(brightness))
-        time.sleep(1)
-        count += 1
-except KeyboardInterrupt:
-    print("Program stopped by the user.")
-finally:
-    # Cleanup
-    i2c.clear()
+i2c = I2C(bus=1)
+i2c.init_lcd()
+main = FastAPI()
+main.mount("/static", StaticFiles(directory="static"), name="static")
+
+@main.get("/light_level", response_class=JSONResponse)
+def get_light_level():
+    voltage = i2c.getLData()
+    brightness = round(voltage * 255 / 5, 2)
+    return JSONResponse(content={"light_level": brightness})
+
+@main.get("/temperature_and_humidity", response_class=JSONResponse)
+def get_temp_and_humidity():
+    temperature, humidity = i2c.getTHData()
+    temperature = round(temperature,2)
+    return JSONResponse(content={"temperature": temperature, "humidity": humidity})
+
+@main.post("/set_display")
+def set_display(display_data: dict):
+    temperature = display_data["temperature"]
+    humidity = display_data["humidity"]
+    brightness = display_data["light_level"]
+    i2c.clear_lcd_screen()
+    i2c.lcd_write(0, 0, 'T: ' + str(temperature) + 'C H: ' + str(humidity) + '%') 
+    i2c.lcd_write(0, 1, 'Light: ' + str(brightness)) 
+    return {"message": "Display data set"}
+
+if __name__ == "__main__":
+    try:
+        uvicorn.run("main:main", host="0.0.0.0", port=1234, reload=True)
+    except KeyboardInterrupt:
+        print("Program stopped by the user.")
+    finally:
+        i2c.clear_lcd_screen()
