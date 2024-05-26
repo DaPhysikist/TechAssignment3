@@ -73,7 +73,7 @@ async def get_sensor_data() -> JSONResponse:
     response = {}
     db = mysql.connect(host=db_host, database=db_name, user=db_user, passwd=db_pass)
     cursor = db.cursor()
-    cursor.execute("select temperature, humidity, light_level, created_at from sensordata order by created_at desc limit 10")
+    cursor.execute("select temperature, humidity, light_level, created_at from sensordata order by created_at desc limit 50")
     records = cursor.fetchall()
     db.close()
     for index, row in enumerate(records):    #iterates through the database data to construct the dict
